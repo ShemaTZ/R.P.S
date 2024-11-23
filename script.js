@@ -7,29 +7,15 @@ function getComputerChoice() {
 
 function playRound(humanChoice, computerChoice) {
     if (humanChoice === computerChoice) {
-        console.log(`It's a tie! Both chose ${humanChoice}.`);
-        return "tie";
+        return `It's a tie! Both chose ${humanChoice}.`;
     } else if (
         (humanChoice === "rock" && computerChoice === "scissors") ||
         (humanChoice === "paper" && computerChoice === "rock") ||
         (humanChoice === "scissors" && computerChoice === "paper")
     ) {
-        console.log(`You win this round! ${humanChoice} beats ${computerChoice}.`);
-        return "human";
+        return `You win this round! ${humanChoice} beats ${computerChoice}.`;
     } else {
-        console.log(`You lose this round! ${computerChoice} beats ${humanChoice}.`);
-        return "computer";
-    }
-}
-
-function getUserChoice() {
-    while (true) {
-        const input = prompt("Enter your choice (rock, paper, scissors):").toLowerCase();
-        if (["rock", "paper", "scissors"].includes(input)) {
-            return input;
-        } else {
-            alert("Invalid choice! Please enter rock, paper, or scissors.");
-        }
+        return `You lose this round! ${computerChoice} beats ${humanChoice}.`;
     }
 }
 
@@ -37,32 +23,68 @@ function playGame() {
     let humanScore = 0;
     let computerScore = 0;
 
-    for (let round = 1; round <= 5; round++) {
-        console.log(`\nRound ${round}:`);
+    // Create a results display element
+    const resultsDiv = document.createElement("div");
+    resultsDiv.id = "results";
+    document.body.appendChild(resultsDiv); // Append to body or container
 
-        const humanChoice = getUserChoice();
-        const computerChoice = getComputerChoice();
-        console.log(`Computer chose: ${computerChoice}`);
+    // Function to handle a round of play
+    function handleRound(playerSelection) {
+        const computerSelection = getComputerChoice();
+        const resultMessage = playRound(playerSelection.toLowerCase(), computerSelection);
 
-        const result = playRound(humanChoice, computerChoice);
-
-        if (result === "human") {
+        // Update scores based on the result
+        if (resultMessage.includes("win")) {
             humanScore++;
-        } else if (result === "computer") {
+        } else if (resultMessage.includes("lose")) {
             computerScore++;
         }
 
-        console.log(`Score after Round ${round}: You - ${humanScore}, Computer - ${computerScore}`);
+        // Update results display
+        resultsDiv.innerHTML = `
+            <p>${resultMessage}</p>
+            <p>Scores => You: ${humanScore}, Computer: ${computerScore}</p>
+        `;
+
+        // Check if the game is over
+        if (humanScore === 5 || computerScore === 5) {
+            let finalMessage;
+            if (humanScore > computerScore) {
+                finalMessage = "🎉 Congratulations, you win the game!";
+            } else {
+                finalMessage = "💻 The computer wins the game. Better luck next time!";
+            }
+            resultsDiv.innerHTML += `<p>${finalMessage}</p>`;
+            // Disable buttons or reset scores (optional)
+            disableButtons();
+        }
     }
 
-    console.log("\nFinal Results:");
-    if (humanScore > computerScore) {
-        console.log("🎉 Congratulations, you win the game!");
-    } else if (computerScore > humanScore) {
-        console.log("💻 The computer wins the game. Better luck next time!");
-    } else {
-        console.log("🤝 It's a tie overall!");
-    }
+    // Create buttons for player choices
+    const container = document.querySelector("#container");
+
+    const rockButton = document.createElement("button");
+    rockButton.textContent = "Rock";
+    rockButton.addEventListener("click", () => handleRound("Rock"));
+
+    const paperButton = document.createElement("button");
+    paperButton.textContent = "Paper";
+    paperButton.addEventListener("click", () => handleRound("Paper"));
+
+    const scissorsButton = document.createElement("button");
+    scissorsButton.textContent = "Scissors";
+    scissorsButton.addEventListener("click", () => handleRound("Scissors"));
+
+    // Append buttons to the container
+    container.appendChild(rockButton);
+    container.appendChild(paperButton);
+    container.appendChild(scissorsButton);
+}
+
+// Function to disable buttons after game ends
+function disableButtons() {
+    const buttons = document.querySelectorAll("#container button");
+    buttons.forEach(button => button.disabled = true);
 }
 
 // Start the game
